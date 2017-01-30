@@ -9,7 +9,7 @@ class Gui:
     main_screen = ["0"]
     sub_screen = []
 
-    operator = ""
+    operator = "+"
 
     number_1 = 0
     number_2 = 0
@@ -188,7 +188,10 @@ class Gui:
         # when = pressed if nothing there
         # 0 = 0
         if num_1 == [] and num_2 == []:
-            num_1 = ["0"]
+            
+            for i in Gui.main_screen:
+                num_1.append(i
+                             )
             num_2 = ["0"]
 
         # i.e. answer to last question was 0

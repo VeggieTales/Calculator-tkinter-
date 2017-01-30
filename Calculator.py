@@ -6,6 +6,7 @@ from tkinter import *
 
 class Gui:
 
+    memory_screen = []
     main_screen = ["0"]
     sub_screen = []
 
@@ -13,6 +14,8 @@ class Gui:
 
     number_1 = 0
     number_2 = 0
+
+    memory_value = []
 
     answer = 0
 
@@ -57,6 +60,9 @@ class Gui:
 
         ## label text on screens
 
+        self.memory_text = Label(self.screen_frame, text = Gui.memory_value)
+        self.memory_text.pack()
+
         self.main_text = Label(self.screen_frame, text = Gui.main_screen)
         self.main_text.pack()
 
@@ -64,6 +70,12 @@ class Gui:
         self.sub_text.pack()
 
         ## buttons for the numbers and functions
+
+        Button(self.line_5, text = "M", command = lambda: self.call_memory()).pack(side = LEFT)
+        Button(self.line_5, text = "M+", command = lambda: self.save_memory()).pack(side = LEFT)
+        Button(self.line_5, text = "MC", command = lambda: self.clear_memory()).pack(side = LEFT)
+        Button(self.line_5, text = "√", command = lambda: self.root_function()).pack(side = LEFT)
+        Button(self.line_5, text = "x^", command = lambda: self.power_function()).pack(side = LEFT)
 
         Button(self.line_4, text = "7", command = lambda: self.num_press("7")).pack(side = LEFT)
         Button(self.line_4, text = "8", command = lambda: self.num_press("8")).pack(side = LEFT)
@@ -87,7 +99,7 @@ class Gui:
         Button(self.line_1, text = ".", command = lambda: self.num_press(".")).pack(side = LEFT)
         Button(self.line_1, text = " ", command = lambda: self.blank_space).pack(side = LEFT)
         Button(self.line_1, text = "ans", command = lambda: self.call_answer()).pack(side = LEFT)
-        Button(self.line_1, text = "=", command = lambda: self.equals(Gui.main_screen)).pack(side = LEFT)
+        Button(self.line_1, text = "=", command = lambda: self.return_answer(Gui.main_screen)).pack(side = LEFT)
 
     # number button is pressed
     def num_press(self, num):
@@ -162,76 +174,98 @@ class Gui:
 
     def blank_space(self):
         pass
-    
-    def equals(self, screen_list):
-        num_1 = []
-        num_2 = []
 
-        ans = 0
+    def return_answer(self, screen_list):
 
-        operators = {"+", "-", "*", "/"}
-
-        count = 0
-        for char in screen_list:
-            count += 1
-            # separating strings of numbers
-            # from either side of operator
-            if char in operators:
-                Gui.operator = char
-
-                for i in range(0, count-1):
-                   num_1.append(screen_list[i])
-
-                for i in range(count, len(screen_list)):
-                    num_2.append(screen_list[i])
-
-        # when = pressed if nothing there
-        # 0 = 0
-        if num_1 == [] and num_2 == []:
-            
-            for i in Gui.main_screen:
-                num_1.append(i
-                             )
-            num_2 = ["0"]
-
-        # i.e. answer to last question was 0
-        elif num_1 == [] and Gui.answer == []:
-            num_1 = ["0"]
-
-        # use answer from last question in next question
-        # carries over to be used
-        elif num_1 == []:
-            num_1.append(Gui.answer)
-
-        num_1 = float(''.join(map(str, num_1)))
-        num_2 = float(''.join(map(str, num_2)))
-
-        if Gui.operator == "+":
-            ans = operations.add(num_1, num_2)
-               
-        elif Gui.operator == "-":
-            ans = operations.subtract(num_1, num_2)
-               
-        elif Gui.operator == "*":
-            ans = operations.multiply(num_1, num_2)
-               
-        elif Gui.operator == "/":
-            ans = operations.divide(num_1, num_2)
-
-        # make int if can do so
-        if ans %1 == 0:
-            ans = int(ans)
-
-        Gui.answer = ans
-        num_1 = []
-        num_2 = []
+        Gui.answer = Operations.equals(self, screen_list)
 
         self.sub_text.config(text = Gui.answer)
 
-        ans = 0
         Gui.show_sum = True
 
-class operations:
+    def call_memory(self):
+
+        if Gui.memory_value == []:
+            pass
+
+        elif Gui.blank == True:
+            Gui.main_screen[0] = Gui.memory_value
+            Gui.blank = False
+
+        else:
+            Gui.main_screen.append(Gui.memory_value)
+
+        self.main_text.config(text = Gui.main_screen)
+
+    def save_memory(self):
+
+        Gui.memory_value = Operations.equals(self, Gui.main_screen)
+        self.memory_text.config(text = Gui.memory_value)
+
+        Gui.show_sum = True
+
+    def clear_memory(self):
+        
+        Gui.memory_value = []
+        self.memory_text.config(text = Gui.memory_value)
+
+        Gui.blank = True
+
+    def root_function(self):
+
+        if Gui.show_sum == True:
+
+            Gui.main_screen = []
+            self.main_text.config(text = Gui.main_screen) 
+
+            num = Gui.answer
+
+        else:
+            num = Operations.equals(self, Gui.main_screen)
+            
+        num = num**(1/2)
+
+        if num %1 == 0:
+            num = int(num)
+
+        Gui.answer = num
+
+        Gui.main_screen.append("√")
+        self.main_text.config(text = Gui.main_screen)
+
+        self.sub_text.config(text = Gui.answer)
+
+        Gui.show_sum = True
+
+    def power_function(self):
+
+        if Gui.show_sum == True:
+            
+            Gui.main_screen = []
+            self.main_text.config(text = Gui.main_screen) 
+
+            num = Gui.answer
+
+        else:
+            num = Operations.equals(self, Gui.main_screen)
+
+        num = num**2
+
+        if num %1 == 0:
+            num = int(num)
+
+        Gui.answer = num
+
+        Gui.main_screen.append("x^")
+        self.main_text.config(text = Gui.main_screen)
+
+        self.sub_text.config(text = Gui.answer)
+
+        Gui.show_sum = True
+        
+
+class Operations:
+    
     def __init__(self):
         pass
 
@@ -247,9 +281,75 @@ class operations:
     def divide(num_1, num_2):
         return(num_1 / num_2)
 
-
+    def equals(self, equation):
         
+        num_1 = []
+        num_2 = []
 
+        ans = 0
+
+        operators = {"+", "-", "*", "/"}
+
+        removables = {"√", "x^"}
+
+        for char in equation:
+
+            if char in removables:
+                equation.remove(char)
+
+        count = 0
+        for char in equation:
+            count += 1
+            # separating strings of numbers
+            # from either side of operator
+            if char in operators:
+                Gui.operator = char
+
+                for i in range(0, count-1):
+                   num_1.append(equation[i])
+
+                for i in range(count, len(equation)):
+                    num_2.append(equation[i])
+
+        # when = pressed if nothing there
+        # 0 = 0
+        if num_1 == [] and num_2 == []:
+            
+            for i in Gui.main_screen:
+                num_1.append(i)
+                
+            num_2 = ["0"]
+
+        # i.e. answer to last question was 0
+        elif num_1 == [] and Gui.answer == []:
+            num_1 = ["0"]
+
+        # use answer from last question in next question
+        # carries over to be used
+        elif num_1 == []:
+            num_1.append(Gui.answer)
+
+        num_1 = float(''.join(map(str, num_1)))
+        num_2 = float(''.join(map(str, num_2)))
+
+        if Gui.operator == "+":
+            ans = Operations.add(num_1, num_2)
+               
+        elif Gui.operator == "-":
+            ans = Operations.subtract(num_1, num_2)
+               
+        elif Gui.operator == "*":
+            ans = Operations.multiply(num_1, num_2)
+               
+        elif Gui.operator == "/":
+            ans = Operations.divide(num_1, num_2)
+
+        # make int if can do so
+        if ans %1 == 0:
+            ans = int(ans)
+
+        return(ans)
+        
 def main():
     root = Tk()
     gui = Gui(root)
